@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>時雨しぐれ｜神社抽籤</title>
+  <style>
+    :root{
+      --bg:#f6f0e6;
+      --paper:#fffaf3;
+      --ink:#2f241f;
+      --muted:#7b6c62;
+      --red:#a52a2a;
+      --deep-red:#7f1d1d;
+      --gold:#c59d5f;
+      --wood:#7a4c2f;
+      --wood-dark:#573522;
+      --shadow:0 18px 50px rgba(68,42,24,.12);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:radial-gradient(circle at top, #fbf6ef 0%, var(--bg) 50%, #efe2d0 100%);color:var(--ink);font-family:"Hiragino Sans","Yu Gothic","Noto Sans TC",system-ui,-apple-system,sans-serif;}
+    body{min-height:100vh;}
+    .page{
+      width:min(1120px, calc(100% - 24px));
+      margin:0 auto;
+      padding:18px 0 56px;
+      position:relative;
+    }
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:32px;
+      padding:28px 20px 24px;
+      background:
+        linear-gradient(180deg, rgba(255,252,248,.96), rgba(250,241,229,.98)),
+        repeating-linear-gradient(90deg, rgba(165,42,42,.05) 0 1px, transparent 1px 28px);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(127,29,29,.08);
+    }
+    .torii{
+      width:min(230px,48vw);
+      margin:0 auto 16px;
+      display:block;
+      opacity:.95;
+    }
+    .brand{
+      text-align:center;
+      letter-spacing:.08em;
+      color:var(--deep-red);
+      font-weight:700;
+      margin-bottom:4px;
+    }
+    h1{
+      margin:0;
+      text-align:center;
+      font-size:clamp(28px, 5vw, 48px);
+      line-height:1.12;
+      letter-spacing:.08em;
+    }
+    .subtitle{
+      text-align:center;
+      margin:14px auto 0;
+      max-width:760px;
+      color:var(--muted);
+      line-height:1.8;
+      font-size:15px;
+    }
+    .note{
+      margin:18px auto 0;
+      width:fit-content;
+      max-width:100%;
+      background:rgba(165,42,42,.06);
+      border:1px solid rgba(165,42,42,.12);
+      color:var(--deep-red);
+      padding:10px 14px;
+      border-radius:999px;
+      font-size:13px;
+      text-align:center;
+    }
+    .content{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
+      margin-top:18px;
+    }
+    .card{
+      background:rgba(255,250,243,.92);
+      border:1px solid rgba(127,29,29,.08);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .draw-card{padding:18px;}
+    .draw-area{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+      align-items:center;
+    }
+    .shrine-stage{
+      position:relative;
+      min-height:420px;
+      border-radius:24px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,.12)),
+        linear-gradient(180deg, #f8f1e6 0%, #efe0ca 100%);
+      overflow:hidden;
+      border:1px solid rgba(122,76,47,.12);
+    }
+    .sun{position:absolute;top:18px;right:18px;width:72px;height:72px;background:radial-gradient(circle, rgba(255,239,178,.92), rgba(255,208,112,.75));border-radius:50%;filter:blur(.2px);}
+    .cloud,.cloud:before,.cloud:after{position:absolute;background:rgba(255,255,255,.72);border-radius:999px;}
+    .cloud{width:84px;height:26px;top:54px;left:26px;}
+    .cloud:before{content:"";width:36px;height:36px;left:10px;top:-14px}
+    .cloud:after{content:"";width:44px;height:44px;right:8px;top:-22px}
+    .cloud.c2{top:98px;left:auto;right:52px;transform:scale(.8)}
+    .mountain{position:absolute;left:0;right:0;bottom:120px;height:140px;background:linear-gradient(180deg,#bfa88d,#a6896f);clip-path:polygon(0 100%, 14% 54%, 24% 78%, 40% 28%, 52% 72%, 66% 38%, 76% 68%, 88% 46%, 100% 100%);opacity:.42}
+    .ground{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(180deg,#d7b998,#bb9367)}
+    .torii-stage{
+      position:absolute;left:50%;bottom:98px;transform:translateX(-50%);width:180px;height:170px;
+    }
+    .torii-top{position:absolute;top:0;left:8px;right:8px;height:16px;background:var(--red);border-radius:10px}
+    .torii-top:after{content:"";position:absolute;left:-10px;right:-10px;top:12px;height:12px;background:#b03a3a;border-radius:8px}
+    .torii-mid{position:absolute;top:36px;left:24px;right:24px;height:14px;background:var(--red);border-radius:8px}
+    .pillar{position:absolute;bottom:0;width:20px;height:138px;background:linear-gradient(180deg,#c73f3f,#8f2222);border-radius:10px}
+    .pillar.left{left:38px}
+    .pillar.right{right:38px}
+    .brace{position:absolute;top:50px;width:18px;height:24px;background:#9b2525;border-radius:6px}
+    .brace.left{left:44px}
+    .brace.right{right:44px}
+
+    .box-zone{
+      position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+      display:flex;flex-direction:column;align-items:center;gap:10px;
+    }
+    .omikuji-box{
+      width:120px;height:180px;border-radius:26px;
+      background:linear-gradient(180deg, #956544 0%, #74472a 55%, #5a321d 100%);
+      border:4px solid rgba(255,255,255,.25);
+      box-shadow:0 18px 24px rgba(72,43,21,.25);
+      position:relative;
+      transform-origin:center 80%;
+    }
+    .omikuji-box:before{content:"御神籤";position:absolute;top:22px;left:50%;transform:translateX(-50%);writing-mode:vertical-rl;letter-spacing:.15em;color:#fff3e8;font-weight:700;font-size:18px;background:rgba(255,255,255,.07);padding:8px 6px;border-radius:12px}
+    .omikuji-box:after{content:"";position:absolute;top:12px;left:50%;transform:translateX(-50%);width:28px;height:9px;border-radius:0 0 10px 10px;background:#2c180f}
+    .box-shadow{width:130px;height:18px;background:rgba(95,56,30,.18);filter:blur(10px);border-radius:50%}
+    .stick{
+      position:absolute;left:50%;bottom:140px;transform:translateX(-50%) translateY(12px) scale(.95);
+      width:14px;height:132px;background:linear-gradient(180deg,#f8efd7,#dbc398);border-radius:999px;opacity:0;
+      box-shadow:0 0 0 2px rgba(123,108,98,.08) inset;
+    }
+    .stick-number{position:absolute;top:12px;left:50%;transform:translateX(-50%) rotate(90deg);font-size:12px;color:#7f1d1d;font-weight:800;letter-spacing:.08em;opacity:0}
+
+    .omikuji-box.shaking{animation:shake .95s ease-in-out}
+    .omikuji-box.shaking + .stick{animation:stickRise .95s ease forwards}
+    .omikuji-box.shaking + .stick .stick-number{animation:numberFade .95s ease forwards}
+
+    @keyframes shake{
+      0%{transform:rotate(0)}
+      10%{transform:rotate(-10deg)}
+      22%{transform:rotate(10deg)}
+      34%{transform:rotate(-12deg)}
+      48%{transform:rotate(12deg)}
+      62%{transform:rotate(-8deg)}
+      76%{transform:rotate(8deg)}
+      100%{transform:rotate(0)}
+    }
+    @keyframes stickRise{
+      0%,35%{opacity:0;transform:translateX(-50%) translateY(14px) scale(.94)}
+      50%{opacity:1;transform:translateX(-50%) translateY(-10px) scale(1)}
+      100%{opacity:1;transform:translateX(-50%) translateY(-30px) scale(1)}
+    }
+    @keyframes numberFade{0%,45%{opacity:0}100%{opacity:1}}
+
+    .controls{display:flex;flex-direction:column;gap:12px}
+    .instruction{
+      padding:16px;
+      border-radius:20px;
+      background:#fff;
+      border:1px dashed rgba(127,29,29,.2);
+      color:var(--muted);
+      line-height:1.8;
+      font-size:14px;
+    }
+    .instruction b{color:var(--deep-red)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    button{
+      appearance:none;border:none;cursor:pointer;border-radius:999px;
+      padding:14px 18px;font-size:15px;font-weight:700;letter-spacing:.08em;
+      transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    button:active{transform:translateY(1px)}
+    .primary{background:linear-gradient(180deg,#ba3737,#8a2020);color:white;box-shadow:0 10px 20px rgba(127,29,29,.2)}
+    .secondary{background:#fff;border:1px solid rgba(127,29,29,.14);color:var(--deep-red)}
+    .ghost{background:transparent;color:var(--deep-red);border:1px dashed rgba(127,29,29,.25)}
+
+    .result-card{padding:18px;display:flex;flex-direction:column;gap:14px}
+    .result-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .result-title{display:flex;flex-direction:column;gap:8px}
+    .result-title small{color:var(--muted);letter-spacing:.08em}
+    .fortune-badge{
+      display:inline-flex;align-items:center;gap:8px;
+      width:fit-content;
+      padding:10px 14px;border-radius:999px;
+      background:rgba(197,157,95,.16);color:#7a531f;font-weight:800;letter-spacing:.12em;
+      border:1px solid rgba(197,157,95,.35);
+    }
+    .number-chip{padding:8px 12px;border-radius:999px;background:rgba(165,42,42,.08);color:var(--deep-red);font-weight:700;font-size:13px}
+    .fortune-paper{
+      background:linear-gradient(180deg, #fffefb, #fff7ea);
+      border:1px solid rgba(122,76,47,.12);
+      border-radius:22px;
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .fortune-paper:before,.fortune-paper:after{content:"";position:absolute;left:18px;right:18px;height:1px;background:rgba(122,76,47,.1)}
+    .fortune-paper:before{top:58px}
+    .fortune-paper:after{top:118px}
+    .waka{font-size:18px;line-height:1.9;letter-spacing:.08em;margin:6px 0 18px;color:#372a24;font-weight:700}
+    .summary{color:var(--muted);line-height:1.9;font-size:14px;margin-top:8px}
+    .grid{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px
+    }
+    .mini{
+      background:rgba(255,255,255,.82);border:1px solid rgba(127,29,29,.08);border-radius:16px;padding:12px
+    }
+    .mini h3{margin:0 0 6px;font-size:13px;color:var(--deep-red);letter-spacing:.1em}
+    .mini p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}
+    .footer-note{font-size:12px;color:var(--muted);line-height:1.8}
+    .history{padding:18px;margin-top:18px}
+    .history h2{margin:0 0 12px;font-size:18px;letter-spacing:.08em}
+    .history-list{display:flex;flex-wrap:wrap;gap:10px}
+    .history-item{padding:10px 12px;border-radius:14px;background:#fff;border:1px solid rgba(127,29,29,.08);font-size:13px;color:var(--muted)}
+    .empty{color:var(--muted);font-size:14px}
+    .floating-ema{
+      position:absolute;top:18px;left:18px;display:flex;gap:8px;flex-wrap:wrap;max-width:180px;
+    }
+    .ema{background:#fff;padding:8px 10px;border-radius:12px;border:1px solid rgba(122,76,47,.12);font-size:12px;color:var(--muted);box-shadow:0 6px 16px rgba(68,42,24,.08)}
+    @media (max-width: 920px){
+      .content,.draw-area{grid-template-columns:1fr}
+      .shrine-stage{min-height:380px}
+    }
+    @media (max-width: 640px){
+      .page{width:min(100% - 14px,1120px);padding-top:8px}
+      .hero{padding:18px 14px 16px;border-radius:22px}
+      .draw-card,.result-card,.history{padding:14px}
+      .grid{grid-template-columns:1fr}
+      .note{border-radius:18px}
+      .floating-ema{max-width:120px;top:12px;left:12px}
+      .omikuji-box{width:110px;height:168px}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <svg class="torii" viewBox="0 0 360 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="42" y="20" width="276" height="24" rx="12" fill="#A52A2A"/>
+        <rect x="24" y="52" width="312" height="18" rx="9" fill="#B33B3B"/>
+        <rect x="78" y="82" width="204" height="20" rx="10" fill="#A52A2A"/>
+        <rect x="92" y="92" width="28" height="90" rx="14" fill="#A52A2A"/>
+        <rect x="240" y="92" width="28" height="90" rx="14" fill="#A52A2A"/>
+        <rect x="98" y="108" width="14" height="22" rx="5" fill="#7F1D1D"/>
+        <rect x="248" y="108" width="14" height="22" rx="5" fill="#7F1D1D"/>
+        <path d="M164 103H196V150C196 158.837 188.837 166 180 166C171.163 166 164 158.837 164 150V103Z" fill="#F5E8D2"/>
+        <path d="M167 107H193V150C193 157.18 187.18 163 180 163C172.82 163 167 157.18 167 150V107Z" fill="#F8F1E6"/>
+      </svg>
+      <div class="brand">時雨しぐれ｜日系選物</div>
+      <h1>時雨しぐれ 神社抽籤</h1>
+      <p class="subtitle">
+        帶一點日本神社散步的氛圍，輕鬆抽一支今日運勢。畫面與籤運結構統一參考<strong>淺草寺（浅草寺）觀音百籤系統風格</strong>製作，
+        不混用其他寺社設定；本頁文案為重新撰寫的娛樂版原創內容。
+      </p>
+      <div class="note">參考系統：淺草寺（浅草寺）／7階籤運風格：大吉・中吉・小吉・末吉・半吉・凶・大凶</div>
+    </section>
+
+    <section class="content">
+      <article class="card draw-card">
+        <div class="draw-area">
+          <div class="shrine-stage">
+            <div class="floating-ema">
+              <div class="ema">戀愛順心</div>
+              <div class="ema">工作穩定</div>
+              <div class="ema">日日平安</div>
+            </div>
+            <div class="sun"></div>
+            <div class="cloud"></div>
+            <div class="cloud c2"></div>
+            <div class="mountain"></div>
+            <div class="torii-stage" aria-hidden="true">
+              <div class="torii-top"></div>
+              <div class="torii-mid"></div>
+              <div class="pillar left"></div>
+              <div class="pillar right"></div>
+              <div class="brace left"></div>
+              <div class="brace right"></div>
+            </div>
+            <div class="ground"></div>
+            <div class="box-zone">
+              <div class="omikuji-box" id="box"></div>
+              <div class="stick" id="stick"><span class="stick-number" id="stickNumber"></span></div>
+              <div class="box-shadow"></div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="instruction">
+              <b>抽籤方式</b><br>
+              先靜下心，想一個你最近在意的願望、工作、戀愛或生活方向，
+              再按下下方按鈕搖出一支今日神籤。
+            </div>
+            <div class="actions">
+              <button class="primary" id="drawBtn">抽一支今日神籤</button>
+              <button class="secondary" id="againBtn">再抽一次</button>
+              <button class="ghost" id="copyBtn">複製本次結果</button>
+            </div>
+            <div class="footer-note">
+              小提醒：這是一頁娛樂性抽籤頁，適合放在你的品牌網站、限動連結或活動頁，讓客人互動玩樂。
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card result-card">
+        <div class="result-head">
+          <div class="result-title">
+            <small>本次抽中</small>
+            <div class="fortune-badge" id="fortuneBadge">尚未抽籤</div>
+          </div>
+          <div class="number-chip" id="numberChip">籤番 ——</div>
+        </div>
+
+        <section class="fortune-paper">
+          <div class="waka" id="waka">請按下「抽一支今日神籤」，迎接今天的運勢。</div>
+          <div class="summary" id="summary">籤文會在這裡出現，包含總運、願望、戀愛、工作、金運、健康與旅途提示。</div>
+          <div class="grid">
+            <div class="mini"><h3>願望</h3><p id="wish">——</p></div>
+            <div class="mini"><h3>戀愛</h3><p id="love">——</p></div>
+            <div class="mini"><h3>工作</h3><p id="work">——</p></div>
+            <div class="mini"><h3>金運</h3><p id="money">——</p></div>
+            <div class="mini"><h3>健康</h3><p id="health">——</p></div>
+            <div class="mini"><h3>旅途</h3><p id="travel">——</p></div>
+          </div>
+        </section>
+      </article>
+    </section>
+
+    <section class="card history">
+      <h2>最近抽到的籤</h2>
+      <div class="history-list" id="historyList">
+        <div class="empty">還沒有抽籤紀錄。</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const fortunes = [
+      { level:'大吉', poems:[
+        '春風拂面花自開，靜待時來福自來。',
+        '雲開月出照長路，一步一穩見光明。',
+        '松間清露映晨日，所求之事可成形。',
+        '潮退方知沙路寬，心定之後好運臨。'
+      ], overall:[
+        '整體氣勢上揚，近期努力容易被看見，適合主動把握機會。',
+        '今天的運勢很亮，貴人運與行動運都不錯，越果斷越有收穫。',
+        '只要不急躁，原本卡住的事很快會向順利方向前進。'
+      ], wish:['心願可望順利推進，越真誠越容易成。','所求之事有望實現，尤其適合主動爭取。'], love:['感情有甜美進展，勇敢表達更有回應。','單戀與曖昧皆有轉機，真心比技巧更重要。'], work:['工作表現亮眼，適合提案、談合作或推新計畫。','適合做重要決定，臨場反應會比平時更好。'], money:['財運佳，但仍要記得見好就收。','小有偏財，購物與投資以理性為先更旺。'], health:['精神飽滿，維持規律作息會更順。','狀態穩定，外出走走有助於提升好心情。'], travel:['出門運佳，臨時安排也能有好體驗。','適合散步、參拜、短旅行，容易有愉快收穫。'] },
+      { level:'中吉', poems:[
+        '新芽初綠未全開，耐心灌溉自成材。',
+        '山徑雖彎終有路，不急不徐步步安。',
+        '清泉流石聲雖細，積久亦能潤四方。',
+        '遠鐘入耳心神定，待得時機好事來。'
+      ], overall:[
+        '運勢穩中向上，適合持續推進，不必急著求快。',
+        '目前正處於好轉階段，只要不半途而廢，成果可期。',
+        '雖非一口氣大開，但整體走勢不錯，適合慢慢累積。'
+      ], wish:['願望可成，但需多一點時間與耐性。','心中所求逐步接近，切忌三心二意。'], love:['感情宜自然發展，太急反而失去節奏。','穩定互動比華麗攻勢更有效。'], work:['工作進展平穩，重視細節會讓你更加分。','適合持續耕耘，不必急著求立刻成果。'], money:['財運平穩，有進有出，宜做好規劃。','小有收穫，但不宜衝動花費。'], health:['身體尚可，避免熬夜與飲食失衡。','狀況逐漸回穩，休息足夠就能更順。'], travel:['旅途平順，提早準備會更安心。','出行無礙，但別過度趕行程。'] },
+      { level:'小吉', poems:[
+        '微雨新晴雲尚薄，前程雖遠亦可行。',
+        '花未盛開香先到，小福已近莫心浮。',
+        '溪橋斜照人緩步，緩中自見好消息。',
+        '一枝新柳迎風立，柔能克剛事可安。'
+      ], overall:[
+        '小小順運正在累積，越是踏實，越能感受到好轉。',
+        '今天適合把注意力放在眼前能做好的一小步。',
+        '雖不是大起大落的一天，但細節運不差，容易得到小確幸。'
+      ], wish:['心願可慢慢接近，別急著一次到位。','所求有小成，持續努力更重要。'], love:['感情有暖意，適合從日常關心開始。','保持自然互動，慢慢會更靠近。'], work:['工作宜穩不宜躁，小成果會逐漸累積成好評。','今天適合整理與補強，而非冒進。'], money:['小財可得，適合保守管理。','有小收穫，但仍要避免情緒性消費。'], health:['注意肩頸與疲勞，稍作伸展會有幫助。','身體無大礙，但需要規律休息。'], travel:['短程出行不錯，節奏放慢更有好心情。','適合附近散心，會有小驚喜。'] },
+      { level:'末吉', poems:[
+        '晚霞映水光猶在，守得平心福自生。',
+        '夜行雖暗星仍照，慢些前行亦無妨。',
+        '寒枝待暖花將發，耐過此時自有春。',
+        '岸邊潮緩舟宜穩，時未到時且安心。'
+      ], overall:[
+        '運勢屬後勢看好型，當下不必焦躁，之後會慢慢轉順。',
+        '雖然現在未必立刻見效，但後續比眼前更值得期待。',
+        '今天適合收心整頓，先穩住，再等機會來。'
+      ], wish:['願望稍晚見成，現在先打好基礎。','所求可望後來轉佳，切莫急進。'], love:['感情需要時間發酵，耐心比催促更有用。','先顧好彼此節奏，之後自然較有進展。'], work:['工作宜守成與修正，後面會慢慢開展。','別急著求表現，穩穩做反而更被看見。'], money:['財運後來漸佳，近期宜保守。','先存再花，後勢會比現在好。'], health:['注意累積疲勞，早睡就是最好的補運。','需要慢慢調養，不宜硬撐。'], travel:['出行可行，但要預留緩衝時間。','不宜太趕，從容安排更順。'] },
+      { level:'半吉', poems:[
+        '半窗晴色半窗雲，行事隨機可保安。',
+        '潮來潮去皆有理，取捨分明路自寬。',
+        '風過竹林聲未定，心若不亂事可平。',
+        '一半天明一半雨，知所進退最為佳。'
+      ], overall:[
+        '吉中帶考驗，能不能穩住心，就是今天最重要的關鍵。',
+        '情況不算差，但需要你判斷輕重緩急，才會越走越順。',
+        '今天不是純靠運氣的一天，而是靠冷靜與拿捏。'
+      ], wish:['心願有望，但需配合時機調整做法。','所求不是不能成，只是不能硬推。'], love:['感情容易忽近忽遠，給彼此一點空間較好。','別急著定義關係，先觀察更有利。'], work:['工作要靈活應對，硬碰硬反而容易卡住。','適合先處理最重要的事，再談其他。'], money:['財運普通，量入為出較穩。','有收有支，別因一時心情亂買。'], health:['情緒和睡眠會影響身體感受，先把節奏放穩。','壓力管理比補品更重要。'], travel:['行程易有小變動，彈性安排即可。','出門無大礙，但不宜太滿。'] },
+      { level:'凶', poems:[
+        '風急舟輕宜且泊，退一步時浪自平。',
+        '路逢細雨泥猶滑，慢步方能免失衡。',
+        '雲遮月色非長夜，守住初心待轉晴。',
+        '枝頭未穩莫攀高，低心守拙可避災。'
+      ], overall:[
+        '今天不宜硬衝，與其求快，不如先減少失誤。',
+        '運勢偏低不是壞事，而是在提醒你調整節奏與方向。',
+        '越是心急越容易出錯，先穩住自己就是化解的開始。'
+      ], wish:['心願暫時難成，先修正方法較重要。','所求易遇阻礙，需多觀察再行動。'], love:['感情容易誤解，少猜測、多確認。','今天不宜衝動表白或翻舊帳。'], work:['工作容易出現反覆，重大決定宜再三確認。','先避開冒進，細節檢查比速度重要。'], money:['破財風險略高，避免衝動購物與高風險操作。','財務宜保守，不要跟風。'], health:['留意腸胃、頭痛或睡眠不足等問題。','多休息、少硬撐，今天先照顧自己。'], travel:['能不趕就不趕，注意交通與時間安排。','外出宜低調保守，別貪快。'] },
+      { level:'大凶', poems:[
+        '重霧迷津須暫止，躁心愈急愈難行。',
+        '逆風未必皆壞事，先收其鋒待天明。',
+        '深夜寒聲敲古寺，一念回頭路可新。',
+        '危橋不渡非無志，避其險處是高明。'
+      ], overall:[
+        '這支籤重點不是嚇人，而是提醒你今天要減速、避險、少逞強。',
+        '眼前不利於硬拚，先停、先看、先調整，反而能把損失降到最低。',
+        '不順只是暫時的警訊，越早冷靜，越快轉運。'
+      ], wish:['所求暫時不宜強行推進，先退一步再看。','心願此刻難成，沉住氣比硬闖更好。'], love:['感情容易因情緒受傷，今天先不要做極端決定。','不宜衝動聯絡、攤牌或過度解讀。'], work:['工作上切忌逞強與貿然承諾，先把風險降下來。','今天適合暫緩大決策，改做檢查與補救。'], money:['破財警訊偏強，所有花費先想一天再說。','不宜投機，也不宜情緒性購買。'], health:['身心都需要休息，今天要把恢復放在第一位。','留意壓力、睡眠與舊疾反覆。'], travel:['若非必要可延後行程，必要外出則務必多留餘裕。','避免危險、夜晚疲勞駕駛與過度趕路。'] }
+    ];
+
+    const levelWeight = ['大吉','大吉','中吉','中吉','中吉','小吉','小吉','小吉','末吉','末吉','末吉','半吉','半吉','凶','凶','凶','大凶'];
+
+    const el = {
+      box: document.getElementById('box'),
+      stick: document.getElementById('stick'),
+      stickNumber: document.getElementById('stickNumber'),
+      drawBtn: document.getElementById('drawBtn'),
+      againBtn: document.getElementById('againBtn'),
+      copyBtn: document.getElementById('copyBtn'),
+      fortuneBadge: document.getElementById('fortuneBadge'),
+      numberChip: document.getElementById('numberChip'),
+      waka: document.getElementById('waka'),
+      summary: document.getElementById('summary'),
+      wish: document.getElementById('wish'),
+      love: document.getElementById('love'),
+      work: document.getElementById('work'),
+      money: document.getElementById('money'),
+      health: document.getElementById('health'),
+      travel: document.getElementById('travel'),
+      historyList: document.getElementById('historyList')
+    };
+
+    let currentResult = null;
+    const history = [];
+
+    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+    function generateFortune(){
+      const number = randInt(1,100);
+      const level = pick(levelWeight);
+      const bank = fortunes.find(f => f.level === level);
+      return {
+        number,
+        level,
+        poem: pick(bank.poems),
+        overall: pick(bank.overall),
+        wish: pick(bank.wish),
+        love: pick(bank.love),
+        work: pick(bank.work),
+        money: pick(bank.money),
+        health: pick(bank.health),
+        travel: pick(bank.travel)
+      };
+    }
+
+    function render(result){
+      el.fortuneBadge.textContent = result.level;
+      el.numberChip.textContent = `籤番 第 ${String(result.number).padStart(2,'0')} 番`;
+      el.waka.textContent = result.poem;
+      el.summary.textContent = result.overall;
+      el.wish.textContent = result.wish;
+      el.love.textContent = result.love;
+      el.work.textContent = result.work;
+      el.money.textContent = result.money;
+      el.health.textContent = result.health;
+      el.travel.textContent = result.travel;
+      currentResult = result;
+
+      history.unshift(`第 ${String(result.number).padStart(2,'0')} 番｜${result.level}`);
+      if(history.length > 8) history.pop();
+      el.historyList.innerHTML = history.map(item => `<div class="history-item">${item}</div>`).join('');
+    }
+
+    function animateDraw(){
+      el.box.classList.remove('shaking');
+      void el.box.offsetWidth;
+      el.box.classList.add('shaking');
+    }
+
+    function draw(){
+      el.drawBtn.disabled = true;
+      el.againBtn.disabled = true;
+      const result = generateFortune();
+      el.stickNumber.textContent = String(result.number).padStart(2,'0');
+      animateDraw();
+      setTimeout(() => {
+        render(result);
+        el.drawBtn.disabled = false;
+        el.againBtn.disabled = false;
+      }, 980);
+    }
+
+    async function copyResult(){
+      if(!currentResult){
+        alert('請先抽一支籤。');
+        return;
+      }
+      const text = `時雨しぐれ 神社抽籤｜第 ${String(currentResult.number).padStart(2,'0')} 番 ${currentResult.level}\n${currentResult.poem}\n總運：${currentResult.overall}\n願望：${currentResult.wish}\n戀愛：${currentResult.love}\n工作：${currentResult.work}\n金運：${currentResult.money}\n健康：${currentResult.health}\n旅途：${currentResult.travel}`;
+      try{
+        await navigator.clipboard.writeText(text);
+        el.copyBtn.textContent = '已複製結果';
+        setTimeout(()=> el.copyBtn.textContent = '複製本次結果', 1400);
+      }catch(err){
+        alert('目前裝置不支援自動複製，請手動複製畫面內容。');
+      }
+    }
+
+    el.drawBtn.addEventListener('click', draw);
+    el.againBtn.addEventListener('click', draw);
+    el.copyBtn.addEventListener('click', copyResult);
+  </script>
+</body>
+</html>
